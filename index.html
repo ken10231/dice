@@ -1,36 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>🎲 PyScript Dice</title>
-  <!-- PyScript 最新CSSとJS -->
+  <title>PyScript Dice</title>
+
+  <!-- PyScript -->
   <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
   <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-  <!-- Three.js CDN -->
+
+  <!-- three.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
   <style>
     body {
       font-family: sans-serif;
-      text-align: center;
       background-color: #f5f5f5;
+      text-align: center;
+      padding: 20px;
     }
-    #dice-canvas {
-      margin-top: 20px;
+    canvas {
+      margin: 20px auto;
+      display: block;
       border: 1px solid #ccc;
-      background-color: white;
+      background: white;
     }
     #roll-button {
-      margin-top: 20px;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       padding: 10px 20px;
+      margin: 10px;
     }
     #dice-result {
       font-size: 2rem;
-      margin-top: 20px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
+
   <h1>🎲 サイコロを振る！</h1>
   <button id="roll-button">サイコロを振る！</button>
   <div id="dice-result"></div>
@@ -41,13 +47,14 @@ import js
 from pyodide.ffi import create_proxy
 import random
 
+# 要素取得
 canvas = js.document.getElementById("dice-canvas")
 scene = js.THREE.Scene.new()
 camera = js.THREE.PerspectiveCamera.new(75, 1, 0.1, 1000)
 renderer = js.THREE.WebGLRenderer.new(js.Object.fromEntries([["canvas", canvas]]))
 renderer.setSize(400, 400)
 
-# サイコロの形状とマテリアル
+# サイコロ（正六面体）
 geometry = js.THREE.BoxGeometry.new(1, 1, 1)
 material = js.THREE.MeshNormalMaterial.new()
 cube = js.THREE.Mesh.new(geometry, material)
@@ -55,21 +62,22 @@ scene.add(cube)
 
 camera.position.z = 3
 
-# アニメーション処理
+# 回転アニメーション
 def animate_rotation():
     for _ in range(60):
         cube.rotation.x += 0.1
         cube.rotation.y += 0.1
         renderer.render(scene, camera)
 
-# 出目を出す関数
+# 出目をランダムに決定
 def roll_dice(event):
     animate_rotation()
     result = random.randint(1, 6)
     js.document.getElementById("dice-result").innerText = f"出た目: {result}"
 
 # ボタンにイベント登録
-js.document.getElementById("roll-button").addEventListener("click", create_proxy(roll_dice))
+roll_btn = js.document.getElementById("roll-button")
+roll_btn.addEventListener("click", create_proxy(roll_dice))
 
 # 初期描画ループ
 def render_loop(*args):
