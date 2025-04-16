@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PyScript Dice</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+  <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+</head>
+<body>
+  <h1 style="text-align:center;">🎲 サイコロを振る！</h1>
+  <div style="text-align:center;">
+    <button id="roll-button">サイコロを振る！</button>
+    <div id="dice-result" style="font-size: 2rem; margin-top: 1rem;"></div>
+  </div>
+  <canvas id="dice-canvas"></canvas>
+
+  <py-script>
+import js
+from pyodide.ffi import create_proxy
+import random
+
+canvas = js.document.getElementById("dice-canvas")
+scene = js.THREE.Scene.new()
+camera = js.THREE.PerspectiveCamera.new(75, js.window.innerWidth / js.window.innerHeight, 0.1, 1000)
+renderer = js.THREE.WebGLRenderer.new({"canvas": canvas})
+renderer.setSize(js.window.innerWidth * 0.6, js.window.innerHeight * 0.6)
+
+geometry = js.THREE.BoxGeometry.new(1, 1, 1)
+material = js.THREE.MeshNormalMaterial.new()
+cube = js.THREE.Mesh.new(geometry, material)
+scene.add(cube)
+camera.position.z = 3
+
+def animate_rotation():
+    for _ in range(60):
+        cube.rotation.x += 0.1
+        cube.rotation.y += 0.1
+        renderer.render(scene, camera)
+
+def roll_dice(event):
+    animate_rotation()
+    result = random.randint(1, 6)
+    js.document.getElementById("dice-result").innerText = f"出た目: {result}"
+
+js.document.getElementById("roll-button").addEventListener("click", create_proxy(roll_dice))
+
+def render_loop(*args):
+    renderer.render(scene, camera)
+    js.requestAnimationFrame(create_proxy(render_loop))
+
+render_loop()
+  </py-script>
+</body>
+</html>
